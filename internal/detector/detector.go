@@ -36,11 +36,13 @@ func AnalyzeGroup(events []model.Event, rule rules.Rule) model.GroupResult {
 			stats.RcvCount++
 			// Match with earliest pending
 			matched := false
+			var matchedSnd model.Event
 			for len(pending) > 0 {
 				snd := pending[0]
 				if ev.Timestamp.Sub(snd.Timestamp) <= rule.MaxWait {
 					pending = pending[1:]
 					matched = true
+					matchedSnd = snd
 					break
 				}
 				// pending too old
@@ -86,12 +88,12 @@ func AnalyzeGroup(events []model.Event, rule rules.Rule) model.GroupResult {
 				lastRcvPayload = ev.PayloadRaw
 			}
 
-			if isSensorFault(ev) {
+			if matched && isSensorFault(ev, matchedSnd) {
 				findings = append(findings, model.Finding{
 					Timestamp: ev.Timestamp,
 					Group:     ev.Group,
 					Type:      model.FindingSensorFault,
-					Detail:    "sensor returned zero payload",
+					Detail:    "unexpected response payload after snd",
 				})
 			}
 		}
@@ -138,8 +140,11 @@ func groupName(events []model.Event) string {
 	return events[0].Group
 }
 
-func isSensorFault(ev model.Event) bool {
+func isSensorFault(ev model.Event, snd model.Event) bool {
 	if ev.Dir != "rcv" {
+		return false
+	}
+	if snd.Dir != "snd" {
 		return false
 	}
 	if !strings.HasPrefix(strings.ToUpper(ev.Group), "WLS") {

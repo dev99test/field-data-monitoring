@@ -13,9 +13,6 @@ var summaryOrder = []struct {
 	Label string
 }{
 	{model.FindingMissingResponse, "응답없음"},
-	{model.FindingExcessRcv, "응답과다"},
-	{model.FindingRcvFlood, "응답폭주"},
-	{model.FindingDuplicateRcv, "중복응답"},
 	{model.FindingSensorFault, "센서고장"},
 }
 
@@ -77,12 +74,6 @@ func normalizeType(t string) string {
 	switch upper {
 	case model.FindingMissingResponse, "MISSINGRESPONSE":
 		return model.FindingMissingResponse
-	case model.FindingExcessRcv, "EXCESSIVERESPONSE":
-		return model.FindingExcessRcv
-	case model.FindingRcvFlood, "RCVFLOOD":
-		return model.FindingRcvFlood
-	case model.FindingDuplicateRcv, "DUPLICATERCV":
-		return model.FindingDuplicateRcv
 	case model.FindingSensorFault, "SENSORFAULT":
 		return model.FindingSensorFault
 	default:
