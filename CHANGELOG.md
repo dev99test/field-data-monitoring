@@ -1,5 +1,7 @@
 # Changelog
 
+## [Unreleased]
+
 ## [v0.1.0]
 ### Added
 - Missing response detection with per-group MaxWait configuration
