@@ -22,6 +22,7 @@ Flags:
 - `--config`: YAML rule file path (default `configs/rules.yaml`)
 - `--json`: print findings as JSON
 - `--out`: save results to a file (JSON)
+- `--summary-only`: print anomaly counts per group in text (no detailed findings)
 - `--since` / `--until`: analyze only within the time window
 
 ## Rule Configuration (configs/rules.yaml)
@@ -46,12 +47,35 @@ Console summary example:
 ```
 [WLS1] lines=6 invalid=0 snd=2 rcv=4 missing=1 flood=1 dup=1 excess=true
 Findings:
-2025-12-30 14:10:10.000 [WLS1] MissingResponse - snd without timely rcv
-2025-12-30 14:10:14.000 [WLS1] RcvFlood - rcv flood without snd
-2025-12-30 14:10:14.000 [WLS1] DuplicateRcv - duplicate rcv payload
-2025-12-30 14:10:14.200 [WLS1] ExcessiveResponse - rcv count exceeds ratio
+2025-12-30 14:10:10.000 [WLS1] MISSING_RESPONSE - snd without timely rcv
+2025-12-30 14:10:14.000 [WLS1] RCV_FLOOD - rcv flood without snd
+2025-12-30 14:10:14.000 [WLS1] DUPLICATE_RCV - duplicate rcv payload
+2025-12-30 14:10:14.200 [WLS1] EXCESS_RCV - rcv count exceeds ratio
 ```
 JSON output is also supported via `--json` or `--out`.
+
+## Summary-only mode (text)
+To print only anomaly counts per group (no detailed lines):
+```bash
+./loganalyzer --root ~/Downloads/underware202408-main/log --summary-only
+```
+
+Output format:
+```
+[WLS1]
+- 응답없음: 3
+- 응답과다: 1
+- 응답폭주: 0
+- 중복응답: 12
+- 센서고장: 5
+
+[GATE1]
+- 응답없음: 0
+- 응답과다: 0
+- 응답폭주: 0
+- 중복응답: 0
+- 센서고장: 7
+```
 
 ## Extensibility
 - Core parsing and detection logic lives under `internal/parser`, `internal/detector`, `internal/rules`, and `internal/report` making it easy to reuse.

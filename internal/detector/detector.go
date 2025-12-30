@@ -1,7 +1,9 @@
 package detector
 
 import (
+	"bytes"
 	"sort"
+	"strings"
 	"time"
 
 	"field-data-monitoring/internal/model"
@@ -45,7 +47,7 @@ func AnalyzeGroup(events []model.Event, rule rules.Rule) model.GroupResult {
 				findings = append(findings, model.Finding{
 					Timestamp: snd.Timestamp,
 					Group:     ev.Group,
-					Type:      "MissingResponse",
+					Type:      model.FindingMissingResponse,
 					Detail:    "snd without timely rcv",
 				})
 				stats.MissingCount++
@@ -62,7 +64,7 @@ func AnalyzeGroup(events []model.Event, rule rules.Rule) model.GroupResult {
 				findings = append(findings, model.Finding{
 					Timestamp: ev.Timestamp,
 					Group:     ev.Group,
-					Type:      "RcvFlood",
+					Type:      model.FindingRcvFlood,
 					Detail:    "rcv flood without snd",
 				})
 				stats.FloodCount++
@@ -74,7 +76,7 @@ func AnalyzeGroup(events []model.Event, rule rules.Rule) model.GroupResult {
 					findings = append(findings, model.Finding{
 						Timestamp: ev.Timestamp,
 						Group:     ev.Group,
-						Type:      "DuplicateRcv",
+						Type:      model.FindingDuplicateRcv,
 						Detail:    "duplicate rcv payload",
 					})
 					stats.DuplicateCount++
@@ -83,6 +85,15 @@ func AnalyzeGroup(events []model.Event, rule rules.Rule) model.GroupResult {
 				duplicateCount = 1
 				lastRcvPayload = ev.PayloadRaw
 			}
+
+			if isSensorFault(ev) {
+				findings = append(findings, model.Finding{
+					Timestamp: ev.Timestamp,
+					Group:     ev.Group,
+					Type:      model.FindingSensorFault,
+					Detail:    "sensor returned zero payload",
+				})
+			}
 		}
 	}
 
@@ -90,7 +101,7 @@ func AnalyzeGroup(events []model.Event, rule rules.Rule) model.GroupResult {
 		findings = append(findings, model.Finding{
 			Timestamp: snd.Timestamp,
 			Group:     snd.Group,
-			Type:      "MissingResponse",
+			Type:      model.FindingMissingResponse,
 			Detail:    "snd without rcv",
 		})
 		stats.MissingCount++
@@ -101,7 +112,7 @@ func AnalyzeGroup(events []model.Event, rule rules.Rule) model.GroupResult {
 		findings = append(findings, model.Finding{
 			Timestamp: lastTimestamp(events),
 			Group:     groupName(events),
-			Type:      "ExcessiveResponse",
+			Type:      model.FindingExcessRcv,
 			Detail:    "rcv count exceeds ratio",
 		})
 	}
@@ -125,4 +136,26 @@ func groupName(events []model.Event) string {
 		return ""
 	}
 	return events[0].Group
+}
+
+func isSensorFault(ev model.Event) bool {
+	if ev.Dir != "rcv" {
+		return false
+	}
+	if !strings.HasPrefix(strings.ToUpper(ev.Group), "WLS") {
+		return false
+	}
+	if len(ev.PayloadBytes) > 0 {
+		return bytes.Count(ev.PayloadBytes, []byte{0}) == len(ev.PayloadBytes)
+	}
+	trimmed := strings.TrimSpace(strings.Trim(ev.PayloadRaw, "()"))
+	if trimmed == "" {
+		return false
+	}
+	for _, part := range strings.Split(trimmed, ",") {
+		if strings.TrimSpace(part) != "00" && strings.TrimSpace(part) != "0" {
+			return false
+		}
+	}
+	return true
 }

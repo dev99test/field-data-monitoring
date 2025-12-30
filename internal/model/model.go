@@ -2,6 +2,15 @@ package model
 
 import "time"
 
+// Finding type constants.
+const (
+	FindingMissingResponse = "MISSING_RESPONSE"
+	FindingExcessRcv       = "EXCESS_RCV"
+	FindingRcvFlood        = "RCV_FLOOD"
+	FindingDuplicateRcv    = "DUPLICATE_RCV"
+	FindingSensorFault     = "SENSOR_FAULT"
+)
+
 // Event represents a single log line.
 type Event struct {
 	Timestamp    time.Time

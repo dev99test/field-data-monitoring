@@ -20,6 +20,7 @@ func main() {
 	configPath := flag.String("config", "configs/rules.yaml", "rules yaml path")
 	jsonOut := flag.Bool("json", false, "print findings as json")
 	outFile := flag.String("out", "", "save json result to file")
+	summaryOnly := flag.Bool("summary-only", false, "print anomaly counts per group without details")
 	sinceStr := flag.String("since", "", "only analyze events since timestamp")
 	untilStr := flag.String("until", "", "only analyze events until timestamp")
 	flag.Parse()
@@ -59,7 +60,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	if *jsonOut {
+	if *summaryOnly {
+		summary := report.BuildSummary(result.Findings, result.Groups)
+		fmt.Print(report.RenderSummary(summary))
+	} else if *jsonOut {
 		if err := report.WriteJSON(os.Stdout, result); err != nil {
 			fmt.Printf("failed to render json: %v\n", err)
 		}
