@@ -75,16 +75,16 @@ func RenderSummary(summary map[string]map[string]int) string {
 func normalizeType(t string) string {
 	upper := strings.ToUpper(t)
 	switch upper {
-        case model.FindingMissingResponse, "MISSINGRESPONSE":
-                return model.FindingMissingResponse
-        case model.FindingExcessRcv, "EXCESSIVERESPONSE":
-                return model.FindingExcessRcv
-        case model.FindingRcvFlood, "RCVFLOOD":
-                return model.FindingRcvFlood
-        case model.FindingDuplicateRcv, "DUPLICATERCV":
-                return model.FindingDuplicateRcv
-        case model.FindingSensorFault, "SENSORFAULT":
-                return model.FindingSensorFault
+	case model.FindingMissingResponse, "MISSINGRESPONSE":
+		return model.FindingMissingResponse
+	case model.FindingExcessRcv, "EXCESSIVERESPONSE":
+		return model.FindingExcessRcv
+	case model.FindingRcvFlood, "RCVFLOOD":
+		return model.FindingRcvFlood
+	case model.FindingDuplicateRcv, "DUPLICATERCV":
+		return model.FindingDuplicateRcv
+	case model.FindingSensorFault, "SENSORFAULT":
+		return model.FindingSensorFault
 	default:
 		return ""
 	}
