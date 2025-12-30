@@ -30,7 +30,8 @@ func TestAnalyzeGroupMissingAndDuplicate(t *testing.T) {
 
 func TestSensorFaultDetection(t *testing.T) {
 	events := []model.Event{
-		{Timestamp: time.Date(2025, 12, 30, 14, 10, 5, 0, time.UTC), Group: "WLS2", Dir: "rcv", PayloadRaw: "(00)", PayloadBytes: []byte{0}},
+		{Timestamp: time.Date(2025, 12, 30, 14, 10, 5, 0, time.UTC), Group: "WLS2", Dir: "snd", PayloadRaw: "(AA)"},
+		{Timestamp: time.Date(2025, 12, 30, 14, 10, 6, 0, time.UTC), Group: "WLS2", Dir: "rcv", PayloadRaw: "(00)", PayloadBytes: []byte{0}},
 	}
 	rule := rules.Rule{MaxWait: 3 * time.Second, ExcessRcvRatio: 1.5, RcvFloodThreshold: 3, DuplicateRcvRepeat: 2}
 	res := AnalyzeGroup(events, rule)
@@ -39,5 +40,18 @@ func TestSensorFaultDetection(t *testing.T) {
 	}
 	if res.Findings[0].Type != model.FindingSensorFault {
 		t.Fatalf("expected sensor fault type, got %s", res.Findings[0].Type)
+	}
+}
+
+func TestSensorFaultRequiresPrecedingSnd(t *testing.T) {
+	events := []model.Event{
+		{Timestamp: time.Date(2025, 12, 30, 14, 10, 5, 0, time.UTC), Group: "WLS2", Dir: "rcv", PayloadRaw: "(00)", PayloadBytes: []byte{0}},
+	}
+	rule := rules.Rule{MaxWait: 3 * time.Second, ExcessRcvRatio: 10, RcvFloodThreshold: 10, DuplicateRcvRepeat: 3}
+	res := AnalyzeGroup(events, rule)
+	for _, finding := range res.Findings {
+		if finding.Type == model.FindingSensorFault {
+			t.Fatalf("unexpected sensor fault without preceding snd")
+		}
 	}
 }

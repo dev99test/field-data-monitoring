@@ -54,6 +54,10 @@ Findings:
 ```
 JSON output is also supported via `--json` or `--out`.
 
+### How detection works
+- **응답없음 (missing response)**: a `snd` event is sent, but no matching `rcv` arrives within the configured wait window.
+- **센서고장 (sensor fault)**: a `snd` is followed by an `rcv` that contains an invalid payload such as `(00)` for WLS sensors.
+
 ## Summary-only mode (text)
 To print only anomaly counts per group (no detailed lines):
 ```bash
@@ -64,16 +68,10 @@ Output format:
 ```
 [WLS1]
 - 응답없음: 3
-- 응답과다: 1
-- 응답폭주: 0
-- 중복응답: 12
 - 센서고장: 5
 
 [GATE1]
 - 응답없음: 0
-- 응답과다: 0
-- 응답폭주: 0
-- 중복응답: 0
 - 센서고장: 7
 ```
 
