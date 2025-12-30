@@ -1,0 +1,12 @@
+default:
+  MaxWait: "5s"
+  ExcessRcvRatio: 1.5
+  RcvFloodThreshold: 3
+  DuplicateRcvRepeat: 3
+overrides:
+  WLS1:
+    MaxWait: "3s"
+  PUMP1:
+    MaxWait: "3s"
+  GATE1:
+    MaxWait: "2s"
