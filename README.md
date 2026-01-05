@@ -22,7 +22,7 @@
 2. 로그 루트(`log_root`) 아래에 각 센서 이름과 동일한 폴더(WLS1, GATE1, PUMP1 등)와 로그 파일이 존재해야 합니다.
 3. 분석 실행:
    ```bash
-   python monitor.py --config config.ini
+   python3 monitor.py --config config.ini
    ```
 4. 생성 결과
    - `output_dir`에 `PC_IP_YYYYMMDD_HHMMSS.log`와 동일한 JSON 요약 파일이 생성됩니다.
